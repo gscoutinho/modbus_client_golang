@@ -62,16 +62,16 @@ func Uint16Converter(v any) ([]byte, error) {
 }
 
 // Test for MultipleWritingRequest.BuildWithConverter()
-func TestMultipleWritingRequestBuildWithConverter(t *testing.T) {
+func TestMultipleWritingRequestBuild(t *testing.T) {
 	// For this test, assume FunctionCode 0x10 represents a "write multiple registers" request.
 	req := &MultipleWritingRequest{
 		Header: ModbusHeader{
-			FC:          0x10, // For example, FCWriteMultipleRegisters = 0x10
+			FC:          0x10, // FCWriteMultipleRegisters = 0x10
 			SlaveID:     0x01,
 			DataAddress: [2]byte{0x00, 0x30},
 		},
 		Quantity:     0x0002, // Expecting 2 registers (4 bytes)
-		Values2Write: []any{uint16(0x0A0B), uint16(0x0C0D)},
+		Values2Write: []byte{0x0A, 0x0B, 0x0C, 0x0D},
 	}
 
 	// Expected frame breakdown:
@@ -83,11 +83,11 @@ func TestMultipleWritingRequestBuildWithConverter(t *testing.T) {
 	// [7-10] Payload:       0x0A, 0x0B, 0x0C, 0x0D
 	expected := []byte{0x01, 0x10, 0x00, 0x30, 0x00, 0x02, 0x04, 0x0A, 0x0B, 0x0C, 0x0D}
 
-	frame, err := req.BuildWithConverter(Uint16Converter)
+	frame, err := req.Build()
 	if err != nil {
-		t.Fatalf("MultipleWritingRequest BuildWithConverter error: %v", err)
+		t.Fatalf("MultipleWritingRequest Build() error: %v", err)
 	}
 	if !reflect.DeepEqual(frame, expected) {
-		t.Errorf("MultipleWritingRequest BuildWithConverter failed.\nExpected: %v\nGot:      %v", expected, frame)
+		t.Errorf("MultipleWritingRequest Build() failed.\nExpected: %v\nGot:      %v", expected, frame)
 	}
 }
